@@ -269,38 +269,64 @@ Uses the same syntax as Hyprland's `gesture` keyword.
 
 ### Per-Monitor Workspace Method
 
-The `workspace_method` custom keyword supports two formats and can be used flexibly:
+Both the plugin config and the global keyword support flexible workspace method configuration:
 
-**Format 1: Global Default (2 arguments)**
-```ini
-workspace_method = <center|first> <workspace>
-```
-Can be used inside OR outside the plugin block. Sets the default for all monitors.
+**Supported Formats:**
+- **2 arguments (global default)**: `<center|first> <workspace>`
+- **3 arguments (per-monitor)**: `MONITOR_NAME <center|first> <workspace>`
 
-**Format 2: Per-Monitor (3 arguments)**
-```ini
-workspace_method = MONITOR_NAME <center|first> <workspace>
-```
-Must be used outside the plugin block at top level. Overrides the global default for specific monitors.
+**Configuration Options:**
 
-**Example Configuration:**
+1. **Plugin Config** (`plugin:hyprexpo:workspace_method`)
+   - Can be used inside the plugin block
+   - Supports both 2-arg and 3-arg formats
+   - Good for single-monitor setups or when you want everything in the plugin block
+
+2. **Global Keyword** (`hyprexpo_workspace_method`)
+   - Used outside the plugin block at top level
+   - Supports both 2-arg and 3-arg formats
+   - Repeatable for multiple monitors
+   - Takes priority over plugin config
+
+**Example Configurations:**
+
 ```ini
-# Global default (can be inside plugin block OR at top level)
+# Option 1: Everything in plugin block
 plugin {
     hyprexpo {
-        workspace_method = center current
+        workspace_method = DP-1 first 1    # Works with both formats!
+        # or
+        workspace_method = center current  # Global default
+    }
+}
+
+# Option 2: Global keyword for per-monitor (recommended for multi-monitor)
+plugin {
+    hyprexpo {
+        workspace_method = center current  # Global default
     }
 }
 
 # Per-monitor overrides (at top level, repeatable)
-workspace_method = DP-1 first 1
-workspace_method = HDMI-A-1 center 5
-workspace_method = eDP-1 first 10
+hyprexpo_workspace_method = DP-1 first 1
+hyprexpo_workspace_method = HDMI-A-1 center 5
+hyprexpo_workspace_method = eDP-1 first 10
+
+# Option 3: Mix and match - use whatever works for your preference
+plugin {
+    hyprexpo {
+        workspace_method = first 1         # Global default in plugin
+    }
+}
+hyprexpo_workspace_method = DP-1 center 5  # Override DP-1 with global keyword
 ```
 
 **Priority Order:**
-1. Monitor-specific config (3-arg format) - highest priority
-2. Global keyword config (2-arg format via `workspace_method` keyword)
-3. Plugin config value (`plugin:hyprexpo:workspace_method`) - fallback
+1. `hyprexpo_workspace_method` keyword for specific monitor (highest priority)
+2. `plugin:hyprexpo:workspace_method` config value (fallback)
 
-This allows complete flexibility: set a global default and override specific monitors as needed.
+**Notes:**
+- Both 2-arg and 3-arg formats work in both locations
+- Use whichever style fits your preference and workflow
+- The 3-arg format in plugin config will only apply to the specified monitor
+- The 2-arg format applies to all monitors without specific overrides

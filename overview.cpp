@@ -247,31 +247,43 @@ static void removeOverview(WP<Hyprutils::Animation::CBaseAnimatedVariable> thisp
 static std::pair<bool, int> getWorkspaceMethodForMonitor(PHLMONITOR monitor) {
     static auto const* PMETHOD = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:workspace_method")->getDataStaticPtr();
 
-    // Check for monitor-specific override first (from hyprexpo_workspace_method keyword)
+    // Priority: hyprexpo_workspace_method keyword > plugin config value
+    // Both support 2 formats: "method workspace" (global) or "MONITOR method workspace" (per-monitor)
     const std::string monitorName = monitor->m_name;
     std::string methodStr;
 
+    // First check hyprexpo_workspace_method keyword for this monitor
     auto it = g_monitorWorkspaceMethods.find(monitorName);
     if (it != g_monitorWorkspaceMethods.end()) {
-        // Use monitor-specific config
         methodStr = it->second;
     } else {
-        // Fallback to global plugin config value
+        // Fallback to plugin config value
         methodStr = std::string{*PMETHOD};
     }
 
-    // Parse the method string
+    // Parse the method string - supports both 2-arg and 3-arg formats
     bool methodCenter = true;
     int methodStartID = monitor->activeWorkspaceID();
 
     CVarList method{methodStr, 0, 's', true};
-    if (method.size() < 2) {
-        Debug::log(ERR, "[he] invalid workspace_method for monitor {}: {}", monitorName, methodStr);
-    } else {
+    if (method.size() == 2) {
+        // Global format: "method workspace"
         methodCenter = method[0] == "center";
         methodStartID = getWorkspaceIDNameFromString(method[1]).id;
         if (methodStartID == WORKSPACE_INVALID)
             methodStartID = monitor->activeWorkspaceID();
+    } else if (method.size() == 3) {
+        // Per-monitor format: "MONITOR method workspace"
+        // Check if it's for this monitor
+        if (std::string{method[0]} == monitorName) {
+            methodCenter = method[1] == "center";
+            methodStartID = getWorkspaceIDNameFromString(method[2]).id;
+            if (methodStartID == WORKSPACE_INVALID)
+                methodStartID = monitor->activeWorkspaceID();
+        }
+        // If not for this monitor, keep defaults (will show current workspace)
+    } else {
+        Debug::log(ERR, "[hyprexpo] invalid workspace_method for monitor {}: {}", monitorName, methodStr);
     }
 
     return {methodCenter, methodStartID};
