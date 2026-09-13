@@ -240,7 +240,7 @@ void COverview::close(bool switchToSelection) {
 
         const auto CHANGE = !NEWIDWS ? Config::Actions::changeWorkspace(std::to_string(NEWID)) : Config::Actions::changeWorkspace(NEWIDWS->getConfigName());
         if (!CHANGE)
-            Log::logger->log(Log::ERR, "[hyprexpo] failed to change workspace: {}", CHANGE.error().message);
+            LOG(Log::ERR, "[hyprexpo] failed to change workspace: {}", CHANGE.error().message);
 
         Animation::Workspace::startAnimation(MON->m_activeWorkspace, Animation::Workspace::ANIMATION_TYPE_IN, true, true);
         Animation::Workspace::startAnimation(OLDWS, Animation::Workspace::ANIMATION_TYPE_OUT, false, true);
@@ -554,7 +554,7 @@ void COverview::fullRender() {
                 CHyprColor color{parsedColor.r, parsedColor.g, parsedColor.b, parsedColor.a};
                 Render::GL::g_pHyprOpenGL->renderBorder(box, color, {.round = roundScaled, .roundingPower = ROUND_PWR, .borderSize = BWIDTH});
             } else {
-                Log::logger->log(Log::ERR, "[hyprexpo] invalid border color config: {}", effectiveSpec);
+                LOG(Log::ERR, "[hyprexpo] invalid border color config: {}", effectiveSpec);
             }
         }
     };
@@ -582,7 +582,7 @@ void COverview::fullRender() {
 
         Hyprexpo::SColorRGBA parsedColor;
         if (!Hyprexpo::parseSolidColorSpec(effectiveSpec, parsedColor)) {
-            Log::logger->log(Log::ERR, "[hyprexpo] invalid drag_drop_proxy_border_color config: {}", effectiveSpec);
+            LOG(Log::ERR, "[hyprexpo] invalid drag_drop_proxy_border_color config: {}", effectiveSpec);
             return;
         }
 

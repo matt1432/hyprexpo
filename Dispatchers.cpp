@@ -534,7 +534,7 @@ void disableExpoGestureRegistration() {
 }
 
 static void reportGestureConfigError(const std::string& error) {
-    Log::logger->log(Log::ERR, "[hyprexpo] {}", error);
+    LOG(Log::ERR, "[hyprexpo] {}", error);
     HyprlandAPI::addNotification(PHANDLE, "[hyprexpo] " + error, CHyprColor{1.0, 0.2, 0.2, 1.0}, 5000);
 }
 
