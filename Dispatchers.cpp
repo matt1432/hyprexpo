@@ -155,12 +155,12 @@ static SDispatchResult bringWindowFromWorkspace(int64_t sourceWorkspaceID) {
     if (!monitor || !monitor->m_activeWorkspace)
         return {.success = false, .error = "no active monitor/workspace"};
 
-    if (sourceWorkspaceID == monitor->activeWorkspaceID())
+    if (sourceWorkspaceID == monitorActiveWorkspaceID(monitor))
         return {};
 
     PHLWORKSPACE sourceWorkspace;
     for (const auto& w : State::workspaceState()->workspacesCopy()) {
-        if (w->m_id == sourceWorkspaceID) {
+        if (workspaceNumber(w) == sourceWorkspaceID) {
             sourceWorkspace = w;
             break;
         }

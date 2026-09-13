@@ -151,7 +151,7 @@ PHLWINDOW COverview::windowAtTilePoint(int id, const Vector2D& localPoint) const
     }
     else {
         for (const auto& w : State::workspaceState()->workspacesCopy()) {
-            if (w->m_id == images[id].workspaceID) {
+            if (workspaceNumber(w) == images[id].workspaceID) {
                 WORKSPACE = w;
                 break;
             }
@@ -223,14 +223,14 @@ PHLWORKSPACE COverview::ensureWorkspaceForTile(int id) {
 
     PHLWORKSPACE workspace;
     for (const auto& w : State::workspaceState()->workspacesCopy()) {
-        if (w->m_id == image.workspaceID) {
+        if (workspaceNumber(w) == image.workspaceID) {
             workspace = w;
             break;
         }
     }
 
     if (!workspace)
-        workspace = State::workspaceState()->create(image.workspaceID, MON->m_id, std::to_string(image.workspaceID), false);
+        workspace = State::workspaceState()->createNumbered(Workspace::SWorkspaceNumberedID{(uint32_t)image.workspaceID}, MON, std::to_string(image.workspaceID), false);
 
     image.pWorkspace = workspace;
     return workspace;
@@ -266,7 +266,7 @@ bool COverview::finishWindowDrag() {
     }
     else {
         for (const auto& w : State::workspaceState()->workspacesCopy()) {
-            if (w->m_id == images[SOURCE].workspaceID) {
+            if (workspaceNumber(w) == images[SOURCE].workspaceID) {
                 SOURCEWS = w;
                 break;
             }
@@ -300,7 +300,7 @@ bool COverview::moveWindowBetweenVisibleIndices(size_t sourceIndex, size_t targe
     }
     else {
         for (const auto& w : State::workspaceState()->workspacesCopy()) {
-            if (w->m_id == images[SOURCE].workspaceID) {
+            if (workspaceNumber(w) == images[SOURCE].workspaceID) {
                 SOURCEWS = w;
                 break;
             }

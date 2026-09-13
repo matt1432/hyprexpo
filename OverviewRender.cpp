@@ -80,7 +80,7 @@ void COverview::redrawID(int id, bool forcelowres) {
     }
     else {
         for (const auto& w : State::workspaceState()->workspacesCopy()) {
-            if (w->m_id == image.workspaceID) {
+            if (workspaceNumber(w) == image.workspaceID) {
                 PWORKSPACE = w;
                 break;
             }
@@ -93,7 +93,7 @@ void COverview::redrawID(int id, bool forcelowres) {
     if (openSpecial)
         MON->m_activeSpecialWorkspace.reset();
 
-    startedOn->m_visible = false;
+    startedOn->setVisible(false);
 
     if (PWORKSPACE) {
         const auto previousWS    = activateWorkspaceForPreview(MON, PWORKSPACE);
@@ -136,7 +136,7 @@ void COverview::redrawID(int id, bool forcelowres) {
     const auto activeWorkspace = restoreWorkspace ? restoreWorkspace : startedOn;
     MON->m_activeWorkspace = activeWorkspace;
     if (activeWorkspace) {
-        activeWorkspace->m_visible = true;
+        activeWorkspace->setVisible(true);
         if (activeWorkspace == startedOn)
             Animation::Workspace::startAnimation(activeWorkspace, Animation::Workspace::ANIMATION_TYPE_IN, true, true);
     }
@@ -220,17 +220,17 @@ void COverview::close(bool switchToSelection) {
 
     redrawAll();
 
-    if (switchToSelection && TILE.workspaceID != MON->activeWorkspaceID()) {
-        MON->setSpecialWorkspace(0);
+    if (switchToSelection && TILE.workspaceID != monitorActiveWorkspaceID(MON)) {
+        MON->setSpecialWorkspace(nullptr);
 
         // If this tile's workspace was WORKSPACE_INVALID, move to the next
         // empty workspace. This should only happen if skip_empty is on, in
         // which case some tiles will be left with this ID intentionally.
-        const int  NEWID = TILE.workspaceID == WORKSPACE_INVALID ? getWorkspaceIDNameFromString("emptynm").id : TILE.workspaceID;
+        const int  NEWID = TILE.workspaceID == WORKSPACE_INVALID ? resolveWorkspaceID("emptynm") : TILE.workspaceID;
 
         PHLWORKSPACE NEWIDWS;
         for (const auto& w : State::workspaceState()->workspacesCopy()) {
-            if (w->m_id == NEWID) {
+            if (workspaceNumber(w) == NEWID) {
                 NEWIDWS = w;
                 break;
             }
@@ -238,7 +238,7 @@ void COverview::close(bool switchToSelection) {
 
         const auto OLDWS = MON->m_activeWorkspace;
 
-        const auto CHANGE = !NEWIDWS ? Config::Actions::changeWorkspace(std::to_string(NEWID)) : Config::Actions::changeWorkspace(NEWIDWS->getConfigName());
+        const auto CHANGE = !NEWIDWS ? Config::Actions::changeWorkspace(std::to_string(NEWID)) : Config::Actions::changeWorkspace(NEWIDWS->addressableName());
         if (!CHANGE)
             LOG(Log::ERR, "[hyprexpo] failed to change workspace: {}", CHANGE.error().message);
 
@@ -269,7 +269,7 @@ void COverview::onWorkspaceChange() {
         startedOn = MON->m_activeWorkspace;
 
     for (size_t i = 0; i < images.size(); ++i) {
-        if (images[i].workspaceID != MON->activeWorkspaceID())
+        if (images[i].workspaceID != monitorActiveWorkspaceID(MON))
             continue;
 
         openedID = i;
@@ -434,15 +434,15 @@ void COverview::fullRender() {
             return {};
 
         const auto& image = images[id];
-        if (image.pWorkspace && !image.pWorkspace->m_name.empty())
-            return image.pWorkspace->m_name;
+        if (image.pWorkspace && !image.pWorkspace->displayName().empty())
+            return image.pWorkspace->displayName();
 
         for (const auto& workspace : State::workspaceState()->workspacesCopy()) {
-            if (!workspace || workspace->m_id != image.workspaceID)
+            if (!workspace || workspaceNumber(workspace) != image.workspaceID)
                 continue;
 
-            if (!workspace->m_name.empty())
-                return workspace->m_name;
+            if (!workspace->displayName().empty())
+                return workspace->displayName();
             break;
         }
 
