@@ -936,7 +936,6 @@ COverview::COverview(PHLWORKSPACE startedOn_, bool swipe_) : startedOn(startedOn
     if (openSpecial)
         PMONITOR->m_activeSpecialWorkspace.reset();
 
-    g_pHyprRenderer->m_bBlockSurfaceFeedback = true;
     settleWorkspaceMoveAnimations();
 
     startedOn->setVisible(false);
@@ -946,7 +945,11 @@ COverview::COverview(PHLWORKSPACE startedOn_, bool swipe_) : startedOn(startedOn
         ensureFramebuffer(image, monbox, framebufferFormatWithAlpha(PMONITOR->m_output->state->state().drmFormat));
 
         CRegion fakeDamage{0, 0, INT16_MAX, INT16_MAX};
-        g_pHyprRenderer->beginRender(PMONITOR, fakeDamage, Render::RENDER_MODE_FULL_FAKE, nullptr, image.fb);
+        if (!g_pHyprRenderer->beginRender(PMONITOR, fakeDamage, Render::RENDER_MODE_FULL_FAKE, nullptr, image.fb))
+            continue;
+
+        auto& ctx                  = g_pHyprRenderer->context();
+        ctx.m_blockSurfaceFeedback = true;
 
         clearWithColor(CHyprColor{0, 0, 0, 1.0});
 
@@ -972,7 +975,7 @@ COverview::COverview(PHLWORKSPACE startedOn_, bool swipe_) : startedOn(startedOn
 
             {
                 CPinnedWindowPreviewGuard pinnedWindowPreviewGuard{showPinnedWindowsInPreview()};
-                g_pHyprRenderer->renderWorkspace(PMONITOR, PWORKSPACE, Time::steadyNow(), monbox);
+                g_pHyprRenderer->renderWorkspace(ctx, PMONITOR, PWORKSPACE, Time::steadyNow(), monbox);
             }
 
             restoreWorkspaceWindowGoalState(windowState);
@@ -984,20 +987,18 @@ startedOn->setVisible(false);
                 PMONITOR->m_activeSpecialWorkspace.reset();
         } else {
             CPinnedWindowPreviewGuard pinnedWindowPreviewGuard{showPinnedWindowsInPreview()};
-            g_pHyprRenderer->renderWorkspace(PMONITOR, PWORKSPACE, Time::steadyNow(), monbox);
+            g_pHyprRenderer->renderWorkspace(ctx, PMONITOR, PWORKSPACE, Time::steadyNow(), monbox);
         }
 
         image.box = tileBoxForIndex((int)i, pMonitor->m_size, GAP_WIDTH, 0.0, true);
 
-        g_pHyprRenderer->m_renderData.blockScreenShader = true;
+        ctx.m_data.blockScreenShader = true;
         g_pHyprRenderer->endRender();
 
         // Capture normalizes rotated monitor geometry; Hyprland's output path adds one more half-turn.
         if (const auto texture = image.fb->getTexture(); texture)
             texture->m_transform = isTransformRotated(savedTransform) ? HYPRUTILS_TRANSFORM_180 : HYPRUTILS_TRANSFORM_NORMAL;
     }
-
-    g_pHyprRenderer->m_bBlockSurfaceFeedback = false;
 
     // Restore the original monitor state after capture
     pMonitor->m_transform       = savedTransform;
