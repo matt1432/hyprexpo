@@ -325,13 +325,13 @@ SP<Render::ITexture> renderNumberTexture(const std::string& text, const CHyprCol
     pango_layout_set_text(layout, text.c_str(), -1);
 
     // font options from config
-    auto* const PFONTFAM = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_font_family")->getDataStaticPtr();
-    auto* const PFONTB   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_font_bold")->getDataStaticPtr();
-    auto* const PFONTI   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_font_italic")->getDataStaticPtr();
-    auto* const PTUNDER  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_text_underline")->getDataStaticPtr();
-    auto* const PTSTRIKE = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_text_strikethrough")->getDataStaticPtr();
+    auto* const PFONTFAM = (Config::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_font_family")->getDataStaticPtr();
+    auto* const PFONTB   = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_font_bold")->getDataStaticPtr();
+    auto* const PFONTI   = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_font_italic")->getDataStaticPtr();
+    auto* const PTUNDER  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_text_underline")->getDataStaticPtr();
+    auto* const PTSTRIKE = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_text_strikethrough")->getDataStaticPtr();
 
-    PangoFontDescription* fontDesc = pango_font_description_from_string(*PFONTFAM);
+    PangoFontDescription* fontDesc = pango_font_description_from_string(PFONTFAM->c_str());
     pango_font_description_set_size(fontDesc, fontSize * scale * PANGO_SCALE);
     pango_font_description_set_weight(fontDesc, **PFONTB ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
     pango_font_description_set_style(fontDesc, **PFONTI ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
@@ -363,8 +363,8 @@ SP<Render::ITexture> renderNumberTexture(const std::string& text, const CHyprCol
     const int    inkH   = std::max(0, ink_rect.height / PANGO_SCALE);
     const int    inkX   = ink_rect.x / PANGO_SCALE; // can be negative
     const int    inkY   = ink_rect.y / PANGO_SCALE; // can be negative
-    auto* const* PCENTERADJX = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_center_adjust_x")->getDataStaticPtr();
-    auto* const* PCENTERADJY = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_center_adjust_y")->getDataStaticPtr();
+    auto* const* PCENTERADJX = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_center_adjust_x")->getDataStaticPtr();
+    auto* const* PCENTERADJY = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:label_center_adjust_y")->getDataStaticPtr();
     const double xOffset = (bufferSize.x - inkW) / 2.0 - inkX + **PCENTERADJX;
     const double yOffset = (bufferSize.y - inkH) / 2.0 - inkY + **PCENTERADJY;
 
@@ -499,7 +499,7 @@ void normalizeMonitorWorkspaceRenderState(PHLMONITOR monitor) {
 }
 
 bool showPinnedWindowsInPreview() {
-    auto* const* PSHOWPINNED = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_pinned_windows")->getDataStaticPtr();
+    auto* const* PSHOWPINNED = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_pinned_windows")->getDataStaticPtr();
     return **PSHOWPINNED != 0;
 }
 
@@ -967,7 +967,7 @@ void removeOverview(WP<Hyprutils::Animation::CBaseAnimatedVariable> thisptr) {
 }
 
 static bool shouldShowCursorDuringOverview() {
-    auto* const* PSHOWCURSOR = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_cursor")->getDataStaticPtr();
+    auto* const* PSHOWCURSOR = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_cursor")->getDataStaticPtr();
     return **PSHOWCURSOR;
 }
 
@@ -1009,7 +1009,7 @@ WORKSPACEID nextEmptyWorkspaceIDForMonitor(const PHLMONITOR& monitor) {
 
 // Returns pair of {isCenter, startWorkspaceID} for the requested monitor.
 static std::pair<bool, int> getWorkspaceMethodForMonitor(PHLMONITOR monitor) {
-    auto const* PMETHOD = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:workspace_method")->getDataStaticPtr();
+    auto const* PMETHOD = (Config::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:workspace_method")->getDataStaticPtr();
 
     const std::string monitorName = monitor->m_name;
     const std::string configStr = std::string{*PMETHOD};
@@ -1040,9 +1040,9 @@ double COverview::currentOuterInset() const {
     if (!MON)
         return 0.0;
 
-    auto* const* PGAPSO = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:gaps_out")->getDataStaticPtr();
+    auto* const* PGAPSO = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:gaps_out")->getDataStaticPtr();
     const double        percent = closing ? (1.0 - size->getPercent()) : size->getPercent();
-    return std::max<Hyprlang::INT>(0, **PGAPSO) * percent;
+    return std::max<Config::INTEGER>(0, **PGAPSO) * percent;
 }
 
 Hyprexpo::STileLayout COverview::tileLayoutForIndex(int id, const Vector2D& totalSize, double gap, double outerInset, bool centerPartialRows) const {
@@ -1100,23 +1100,23 @@ COverview::COverview(PHLWORKSPACE startedOn_, PHLMONITOR monitor_, bool swipe_, 
     const auto PMONITOR = monitor_;
     pMonitor            = PMONITOR;
 
-    auto* const* PCOLUMNS  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:columns")->getDataStaticPtr();
-    auto* const* PROWS     = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:rows")->getDataStaticPtr();
-    auto* const* PGAPS     = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:gaps_in")->getDataStaticPtr();
-    auto* const* PCOL      = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:bg_col")->getDataStaticPtr();
-    auto* const* PSKIP     = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:skip_empty")->getDataStaticPtr();
-    auto* const* PMAXWS    = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:max_workspace")->getDataStaticPtr();
-    auto* const* PSHOWNUM  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_workspace_numbers")->getDataStaticPtr();
-    auto* const* PDYNAMIC  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:dynamic_grid")->getDataStaticPtr();
-    auto* const* PFILLGAPS = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:fill_gaps")->getDataStaticPtr();
-    auto* const* PMRUSORT  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:mru_sort")->getDataStaticPtr();
-    auto* const* PSHNAMES  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_workspace_names")->getDataStaticPtr();
-    auto* const* PANIMATE  = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:animate_entry")->getDataStaticPtr();
-    auto* const* PWALLBG   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:wallpaper_bg")->getDataStaticPtr();
+    auto* const* PCOLUMNS  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:columns")->getDataStaticPtr();
+    auto* const* PROWS     = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:rows")->getDataStaticPtr();
+    auto* const* PGAPS     = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:gaps_in")->getDataStaticPtr();
+    auto* const* PCOL      = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:bg_col")->getDataStaticPtr();
+    auto* const* PSKIP     = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:skip_empty")->getDataStaticPtr();
+    auto* const* PMAXWS    = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:max_workspace")->getDataStaticPtr();
+    auto* const* PSHOWNUM  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_workspace_numbers")->getDataStaticPtr();
+    auto* const* PDYNAMIC  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:dynamic_grid")->getDataStaticPtr();
+    auto* const* PFILLGAPS = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:fill_gaps")->getDataStaticPtr();
+    auto* const* PMRUSORT  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:mru_sort")->getDataStaticPtr();
+    auto* const* PSHNAMES  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:show_workspace_names")->getDataStaticPtr();
+    auto* const* PANIMATE  = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:animate_entry")->getDataStaticPtr();
+    auto* const* PWALLBG   = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:wallpaper_bg")->getDataStaticPtr();
 
     createdAt            = std::chrono::steady_clock::now();
     gridShape            = Hyprexpo::computeFixedGridShape(**PCOLUMNS, **PROWS);
-    GAP_WIDTH            = std::max<Hyprlang::INT>(0, **PGAPS);
+    GAP_WIDTH            = std::max<Config::INTEGER>(0, **PGAPS);
     BG_COLOR             = **PCOL;
     showWorkspaceNumbers = **PSHOWNUM;
     showWorkspaceNames   = **PSHNAMES;
@@ -1129,7 +1129,7 @@ COverview::COverview(PHLWORKSPACE startedOn_, PHLMONITOR monitor_, bool swipe_, 
 
     // r includes empty workspaces; m skips over them
     const bool    skipEmpty    = **PSKIP;
-    const int64_t maxWorkspace = std::max<Hyprlang::INT>(0, **PMAXWS);
+    const int64_t maxWorkspace = std::max<Config::INTEGER>(0, **PMAXWS);
     std::string   selector     = skipEmpty ? "m" : "r";
     emptyTilesSelectable = skipEmpty;
     crossMonitor = HyprlandAPI::intValue("plugin:hyprexpo:cross_monitor") && !methodCenter && !skipEmpty && !dynamicGrid && methodStartID > 0;

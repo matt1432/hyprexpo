@@ -482,8 +482,8 @@ bool COverview::selectVisibleToken(const std::string& token) {
     if (closing)
         return false;
 
-    auto* const* PSELECTLABEL = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:selection_label_enable")->getDataStaticPtr();
-    auto const*  PSELECTMAP   = (Hyprlang::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:selection_label_token_map")->getDataStaticPtr();
+    auto* const* PSELECTLABEL = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:selection_label_enable")->getDataStaticPtr();
+    auto const*  PSELECTMAP   = (Config::STRING const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:selection_label_token_map")->getDataStaticPtr();
 
     const std::string normalized = lowerString(trimString(token));
     if (normalized.empty())
@@ -517,11 +517,11 @@ bool COverview::moveFocus(int dx, int dy) {
     int x = kbFocusID % shape.cols;
     int y = kbFocusID / shape.cols;
 
-    auto* const* PWRAPH = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_wrap_h")->getDataStaticPtr();
-    auto* const* PWRAPV = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_wrap_v")->getDataStaticPtr();
+    auto* const* PWRAPH = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_wrap_h")->getDataStaticPtr();
+    auto* const* PWRAPV = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_wrap_v")->getDataStaticPtr();
 
     if (dx != 0) {
-        auto* const* PREADING = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_reading_order")->getDataStaticPtr();
+        auto* const* PREADING = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_reading_order")->getDataStaticPtr();
         int                 step     = dx > 0 ? 1 : -1;
         if (**PREADING) {
             // reading-order scan: proceed linearly across the grid (row-major)
@@ -714,8 +714,8 @@ void COverview::onSwipeUpdate(double delta) {
     if (swipeWasCommenced)
         return;
 
-    auto* const* PDISTANCE = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:gesture_distance")->getDataStaticPtr();
-    const double        distance  = std::max<Hyprlang::INT>(1, **PDISTANCE);
+    auto* const* PDISTANCE = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:gesture_distance")->getDataStaticPtr();
+    const double        distance  = std::max<Config::INTEGER>(1, **PDISTANCE);
 
     const float         PERC               = closing ? std::clamp(delta / distance, 0.0, 1.0) : 1.0 - std::clamp(delta / distance, 0.0, 1.0);
     const auto          WORKSPACE_FOCUS_ID = closing && closeOnID != -1 ? closeOnID : openedID;
@@ -775,7 +775,7 @@ static int         g_submapRefs     = 0;
 static std::string g_previousSubmap = "";
 
 void enterOverviewSubmap(bool& submapActive) {
-    auto* const* PKEYNAV = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_enable")->getDataStaticPtr();
+    auto* const* PKEYNAV = (Config::INTEGER* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprexpo:keynav_enable")->getDataStaticPtr();
     if (!**PKEYNAV || submapActive)
         return;
 

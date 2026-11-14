@@ -792,7 +792,7 @@ void CScrollingOverview::onSwipeUpdate(double delta) {
         return;
     m_isSwiping = true;
     m_swipeDelta = delta;
-    const double distance = std::max<Hyprlang::INT>(1, CompatHyprlandAPI::intValue("plugin:hyprexpo:gesture_distance"));
+    const double distance = std::max<Config::INTEGER>(1, CompatHyprlandAPI::intValue("plugin:hyprexpo:gesture_distance"));
     const float progress = static_cast<float>(transitionForSwipe(m_swipeClosing, m_swipeDelta, distance));
     m_transitionProgress->setCallbackOnEnd(nullptr);
     m_transitionProgress->setValueAndWarp(progress);

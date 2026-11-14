@@ -14,7 +14,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 LOOKUP = re.compile(
     r'(?P<declaration>(?:static\s+)?auto[^\n;]*?\b(?P<name>P[A-Z0-9_]+)\s*='
-    r'\s*\(Hyprlang::(?P<kind>INT|FLOAT|STRING)[^;]*?'
+    r'\s*\(Config::(?P<kind>INTEGER|FLOAT|STRING)[^;]*?'
     r'getConfigValue\(PHANDLE,\s*"(?P<key>[^"]+)"\)->getDataStaticPtr\(\);)'
 )
 
@@ -38,21 +38,19 @@ class ConfigLifetimeTests(unittest.TestCase):
 #include <memory>
 #include <string>
 #include <vector>
-namespace Hyprlang { using INT = int64_t; using FLOAT = float; using STRING = const char*; }
+namespace Config { using INTEGER = int64_t; using FLOAT = float; using STRING = std::string; }
 void* PHANDLE = nullptr;
 struct Value {
     std::string kind;
-    Hyprlang::INT integer = 0;
-    Hyprlang::INT* integerPtr = &integer;
-    Hyprlang::FLOAT floating = 0;
-    Hyprlang::FLOAT* floatingPtr = &floating;
-    std::string storage;
-    Hyprlang::STRING string = nullptr;
+    Config::INTEGER integer = 0;
+    Config::INTEGER* integerPtr = &integer;
+    Config::FLOAT floating = 0;
+    Config::FLOAT* floatingPtr = &floating;
+    Config::STRING string;
     void set(int generation) {
         integer = generation;
         floating = generation;
-        storage = std::string(128, 'a' + generation);
-        string = storage.c_str();
+        string = std::string(128, 'a' + generation);
     }
     void* getDataStaticPtr() {
         if (kind == "STRING") return &string;
