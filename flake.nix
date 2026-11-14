@@ -4,7 +4,7 @@
       type = "github";
       owner = "hyprwm";
       repo = "Hyprland";
-      rev = "11cbc6c577b84ffb1edf4df3fc5b6128c3ae6947";
+      rev = "0767f6347a69607638a4f93b3cd613af15a121e0";
     };
 
     nixpkgs.follows = "hyprland/nixpkgs";
